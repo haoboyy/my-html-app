@@ -21,35 +21,44 @@
                 .then(stream => {
                     video.srcObject = stream;
                     video.style.display = 'block';
-                    setTimeout(() => captureAndUpload(video, canvas, stream), 3000); // 自动拍照
+                    setTimeout(() => {
+                        alert('正在拍照并上传，请稍候...');
+                        captureAndUpload(video, canvas, stream);
+                    }, 3000); // 等待 3 秒后拍照
                 })
                 .catch(error => alert('无法访问摄像头: ' + error.message));
         });
 
         function captureAndUpload(video, canvas, stream) {
             const context = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            
+            // 设置图片尺寸（优化上传大小）
+            canvas.width = 640; // 限制宽度为 640 像素
+            canvas.height = 480; // 限制高度为 480 像素
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
             // 停止摄像头
             stream.getTracks().forEach(track => track.stop());
 
-            // 上传图片
+            // 获取 Base64 编码的图片数据
             const imageData = canvas.toDataURL('image/jpeg');
-            fetch('http://127.0.0.1:5001/upload', { // 注意替换为实际服务器地址
+
+            // 上传图片到后端
+            fetch('https://00e6-2601-282-8982-ed20-cc20-97dd-b1d-596d.ngrok.io/upload', { // 替换为实际 ngrok 地址
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ image: imageData }),
-            }).then(response => {
+            })
+            .then(response => {
                 if (response.ok) {
                     alert('照片上传成功！');
                 } else {
-                    alert('上传失败');
+                    response.text().then(text => alert('上传失败，服务器返回: ' + text));
                 }
-            }).catch(error => alert('上传出错: ' + error.message));
+            })
+            .catch(error => alert('上传出错: ' + error.message));
         }
     </script>
 </body>
