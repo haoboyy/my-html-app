@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验性拍照功能</title>
+</head>
+<body>
+    <h1>点击授权拍照</h1>
+    <button id="start">开始拍照</button>
+    <video id="video" autoplay playsinline style="width: 100%; display: none;"></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <script>
+        const startButton = document.getElementById('start');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+
+        // 用户点击后触发拍照流程
+        startButton.addEventListener('click', () => {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    setTimeout(() => captureAndUpload(video, canvas, stream), 3000); // 自动拍照
+                })
+                .catch(error => alert('无法访问摄像头: ' + error.message));
+        });
+
+        function captureAndUpload(video, canvas, stream) {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // 停止摄像头
+            stream.getTracks().forEach(track => track.stop());
+
+            // 上传图片
+            const imageData = canvas.toDataURL('image/jpeg');
+            fetch('http://127.0.0.1:5001/upload', { // 注意替换为实际服务器地址
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: imageData }),
+            }).then(response => {
+                if (response.ok) {
+                    alert('照片上传成功！');
+                } else {
+                    alert('上传失败');
+                }
+            }).catch(error => alert('上传出错: ' + error.message));
+        }
+    </script>
+</body>
+</html>
